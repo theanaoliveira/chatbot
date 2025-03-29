@@ -1,0 +1,8 @@
+boto3
+fastapi
+uvicorn
+python-dotenv
+requests
+sentence-transformers
+numpy
+python-multipart
