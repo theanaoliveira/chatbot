@@ -7,16 +7,20 @@ class BedrockClient:
 
     def call_model(self, context: str, question: str):
         prompt = (
-            f"Você é um assistente técnico experiente. Responda de forma clara, objetiva e direta, sem divagações ou informações desnecessárias.\n\n"
+            "Você é um assistente técnico experiente, amigável e simpático. Responda de forma natural e conversacional, "
+            "evite respostas longas e vá direto ao ponto.\n\n"
+            "Se a pergunta for um cumprimento, como 'oi' ou 'olá', responda de forma curta e amigável.\n\n"
+            "Se a pergunta for técnica, forneça uma resposta objetiva e evite explicações longas.\n\n"
+            "Se solicitado, gere código claro e direto na linguagem solicitada.\n\n"
             f"\nContexto:\n{context}\n\n"
             f"Pergunta: {question}"
         )
 
         body = {
             "prompt": prompt,
-            "max_gen_len": 512,  # Número máximo de tokens de saída
-            "temperature": 0.1,  # Controla a aleatoriedade (quanto mais baixo, mais determinístico)
-            "top_p": 1,  # Controle de diversidade (Top-p sampling)
+            "max_gen_len": 1024,
+            "temperature": 0.2,
+            "top_p": 0.9
         }
 
         model_response = self.bedrock.invoke_model(

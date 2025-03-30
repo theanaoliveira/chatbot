@@ -6,3 +6,4 @@ requests
 sentence-transformers
 numpy
 python-multipart
+cachetools
