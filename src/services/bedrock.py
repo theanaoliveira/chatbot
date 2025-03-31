@@ -1,41 +1,46 @@
 import boto3
 import json
+import re
 
 class BedrockClient:
     def __init__(self, region="us-east-1"):
         self.bedrock = boto3.client("bedrock-runtime", region_name=region)
 
     def call_model(self, context: str, question: str):
-        prompt = (
-            "Você é um assistente técnico experiente, amigável e simpático. Responda de forma natural e conversacional, "
-            "evite respostas longas e vá direto ao ponto.\n\n"
-            "Se a pergunta for um cumprimento, como 'oi' ou 'olá', responda de forma curta e amigável.\n\n"
-            "Se a pergunta for técnica, forneça uma resposta objetiva e evite explicações longas.\n\n"
-            "Se solicitado, gere código claro e direto na linguagem solicitada.\n\n"
-            f"\nContexto:\n{context}\n\n"
-            f"Pergunta: {question}"
-        )
+        conversation = [
+            {
+                "role": "user",
+                "content": [{"text": f"Contexto: {context} "}],
+            },
+            {
+                "role": "assistant",
+                "content": [{"text": "Aqui está o contexto que você deve utilizar como base para responder a pergunta do usuário"}],
+            },
+            {
+                "role": "user",
+                "content": [{"text": f"{question}"}],
+            }
+        ]
 
-        body = {
-            "prompt": prompt,
-            "max_gen_len": 1024,
-            "temperature": 0.2,
-            "top_p": 0.9
+        inference_config = {
+            "maxTokens": 512,
+            "temperature": 0.3,
+            "topP": 0.9
         }
 
-        model_response = self.bedrock.invoke_model(
+        response = self.bedrock.converse(
             modelId="meta.llama3-8b-instruct-v1:0",
-            contentType="application/json",
-            accept="application/json",
-            body=json.dumps(body)
+            messages=conversation,
+            inferenceConfig=inference_config
         )
 
-        response_body = model_response['body'].read()
-        response_json = json.loads(response_body.decode('utf-8'))
+        response_text = response["output"]["message"]["content"][0]["text"]
 
-        generation = response_json.get('generation')
+        return self._clean_response(response_text)
 
-        if not generation or not isinstance(generation, str) or not generation.strip():
-            raise ValueError("A resposta do modelo está vazia ou mal formatada.")
+    def _clean_response(self, response):
+        cleaned_response = re.sub(r'```[\s]*```', '', response)
+        cleaned_response = re.sub(r'\n+', '\n', cleaned_response)
+        cleaned_response = re.sub(r'(\n)(\*\*|__|\*|_|\n)', r'\1', cleaned_response)
 
-        return generation.strip()
+        return cleaned_response

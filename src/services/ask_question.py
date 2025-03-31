@@ -44,7 +44,7 @@ class AskQuestion:
             return response
 
         context = "\n\n".join([doc["content"] for doc in relevant_documents])
-
+        
         try:
             response = self.bedrock.call_model(context, question)
         except Exception as e:
@@ -72,10 +72,11 @@ class AskQuestion:
 
                 score = self.embedding.cosine_similarity(question_embedding, doc_embedding)
                 
-                similar_documents.append({
-                    "topic": doc["topic"],
-                    "content": doc["content"],
-                    "score": score
-                })
+                if score > 0.6:
+                    similar_documents.append({
+                        "topic": doc["topic"],
+                        "content": doc["content"],
+                        "score": score
+                    })
 
         return sorted(similar_documents, key=lambda d: d["score"], reverse=True)[:3]
