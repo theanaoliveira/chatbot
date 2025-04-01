@@ -71,12 +71,11 @@ class AskQuestion:
                 doc_embedding = self.embedding.decode_content(doc["embedding"])
 
                 score = self.embedding.cosine_similarity(question_embedding, doc_embedding)
-                
-                if score > 0.6:
-                    similar_documents.append({
-                        "topic": doc["topic"],
-                        "content": doc["content"],
-                        "score": score
-                    })
+
+                similar_documents.append({
+                    "topic": doc["topic"],
+                    "content": doc["content"],
+                    "score": score
+                })
 
         return sorted(similar_documents, key=lambda d: d["score"], reverse=True)[:3]
