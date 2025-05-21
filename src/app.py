@@ -7,6 +7,7 @@ from services.embedding import Embedding
 from services.dynamo import DynamoRepository
 from services.bedrock import BedrockClient
 from services.ask_question import AskQuestion
+from services.generate_document import GenerateDocument
 
 # Inicialização da aplicação
 app = FastAPI(
@@ -34,8 +35,10 @@ def startup_event():
     dynamo = DynamoRepository(embedding=embedding)
     bedrock = BedrockClient()
     ask = AskQuestion(dynamo=dynamo, embedding=embedding, bedrock=bedrock)
+    generate_doc = GenerateDocument(bedrock=bedrock)
 
     app.state.embedding = embedding
     app.state.dynamo = dynamo
     app.state.bedrock = bedrock
     app.state.ask = ask
+    app.state.generate_doc = generate_doc
